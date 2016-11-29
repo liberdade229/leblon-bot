@@ -1,7 +1,7 @@
 
 'use strict'
 
-const bot = require('./bot')
+const bot = require('./bot')()
 const fb = require('./facebook')
 
 fb.start(bot.start)
