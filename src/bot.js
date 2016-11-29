@@ -27,7 +27,7 @@ var no_option = [
   "Really? XXX? With this weather? You must be kidding...",
   "No XXX today. Have a salad instead cause summer is just around the corner… Just saying :)",
   "XXX again?! We cannot have XXX everyday! Try something different for a change.",
-  "Sorry. No XXX for today. We are on a strict diet and so all our customers."
+  "Sorry. No XXX for today. We are on a strict diet and so are all our customers."
 ]
 
 var multi_option = [
