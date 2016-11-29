@@ -12,25 +12,27 @@ const commands = {
     let latest = Menu[0].message
     bot.reply(message, latest)
   },
-  plate: function(bot, message) {
+  dishes: function(bot, message) {
   
-    var plate = message.match[1]
-    var lower_plate = plate.toLowerCase()
-    var menu = Menu[0].message
+    const wanted = message.match[1]
+    const wanted_lower = wanted.toLowerCase()
+    const available = Menu[0].message.split('\n')
+    const dishes = []
 
-    const lines = menu.split('\n')
-    for (let line of lines) {
-      var lower_line = line.toLowerCase()
-      if (lower_line.includes(lower_plate)) {
-        plate = line.trim()
-        break
-      }
+    for (let line of available) {
+      let hit = line.toLowerCase().includes(wanted_lower)
+      if (hit) dishes.push(line.trim())
     }
 
-    let has_plate = menu.toLowerCase().includes(lower_plate)
     var answer = ''
-    if (has_plate) answer = 'Good news! You can have '+plate+' today!'
-    else answer = 'Bad luck, no '+plate+' today :disappointed:'
+    if (dishes.length > 0) {
+      answer = 'Good news! You can have '
+      answer += dishes.join(' or ')
+      answer += ' today!'
+    }
+    else {
+      answer = 'Bad luck, no '+wanted+' today :disappointed:'
+    }
 
     bot.reply(message, answer)
   }
@@ -40,7 +42,7 @@ const controller = Botkit.slackbot({
   debug: false
 })
 controller.hears(['menu','today'], commands.listen_to, commands.menu)
-controller.hears(['(\\w.*\\b)\\^?', '(\\w.+\\b)\\^!'], commands.listen_to, commands.plate)
+controller.hears(['(\\w.*\\b)\\^?', '(\\w.+\\b)\\^!'], commands.listen_to, commands.dishes)
 
 const bot = {
   start: function(start_menu) {
