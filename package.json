@@ -1,0 +1,26 @@
+{
+  "name": "leblon",
+  "version": "1.0.0",
+  "description": "Leblon Bot",
+  "main": "src/index.js",
+  "engines": {
+    "node": "^5",
+    "npm": "^3
+  },
+  "dependencies": {
+    "botkit": "^0.4.2",
+    "dotenv": "^2.0.0",
+    "fb": "^1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node ./src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "email": "alex@manybots.com",
+    "name": "Alexandre L. Solleiro",
+    "url": "https://twitter.com/als"
+  },
+  "license": "MIT"
+}
