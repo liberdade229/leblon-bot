@@ -30,7 +30,7 @@ const facebook = {
     fb.api(config('FB_FEED'), options, function(res) {
       if (!res || res.error) {
         console.log(!res ? 'Error fetching feed' : res.error)
-        return;
+        return
       }
       if (cb) cb(res.data)
     })

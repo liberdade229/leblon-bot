@@ -49,7 +49,7 @@ const bot = {
     const available = []
 
     for (let line of Menu.dishes()) {
-      let pattern = new RegExp('\\b'+wanted_lower+'\\b');
+      let pattern = new RegExp('\\b'+wanted_lower+'\\b')
       let hit = pattern.test(line.toLowerCase())
       if (hit) available.push(line.trim())
     }
