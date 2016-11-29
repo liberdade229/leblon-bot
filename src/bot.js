@@ -1,91 +1,83 @@
 
 'use strict'
 
+String.prototype.capitalize = function() {
+  return this.charAt(0).toUpperCase() + this.slice(1)
+}
+String.prototype.replaceAll = function(search, replacement) {
+  return this.replace(new RegExp(search, 'g'), replacement)
+}
+
+require.extensions['.txt'] = function (module, filename) {
+  module.exports = fs.readFileSync(filename, 'utf8')
+}
+
+const fs = require('fs')
 const config = require('./config')
 const Botkit = require('botkit')
+const Menu = require('./menu')
 
-String.prototype.capitalize = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1)
-}
+const no_results = require('./data/no_results.txt').split('\n')
+const single_result = require('./data/single_result.txt').split('\n')
+const multiple_results = require('./data/multiple_results.txt').split('\n')
+const troll_results = require('./data/troll_results.txt').split('\n')
 
-String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
-    return target.replace(new RegExp(search, 'g'), replacement)
-}
-
-var single_option = [
-  "You must be reading our minds! We’ll put aside a dose of XXX just for you.",
-  "Of course we do have XXX you lucky bastard!",
-  "Yes, we have XXX! And let me say I personally tasted it and it's deliciously good today.",
-  "XXX? Of course we have it. That’s our favourite too!",
-  "Excellent choice! But you need to hurry because XXX is selling out like hot cupcakes.",
-  "Your wish is our command! XXX it is!!"
-]
-
-var no_option = [
-  "Sorry. No XXX for today. We started cooking it but soon realised it would not meet your highest standards.",
-  "Really? XXX? With this weather? You must be kidding...",
-  "No XXX today. Have a salad instead cause summer is just around the corner… Just saying :)",
-  "XXX again?! We cannot have XXX everyday! Try something different for a change.",
-  "Sorry. No XXX for today. We are on a strict diet and so are all our customers."
-]
-
-var multi_option = [
-  "Be a little bit more specific, will ya? YYY is not a dish, it’s an ingredient you’ll find on today’s XXX.",
-  "You may find YYY on today’s XXX. Now it’s up to you to choose because I'm just a bot. Not a mind reader.",
-  "There are so many ways to cook YYY. Today you can choose from XXX.",
-  "With YYY you can order XXX. Or be a little crazy and mix them all."
-]
-
-var Menu = []
-
-const commands = {
+const bot = {
+  slack: Botkit.slackbot({debug: false}),
   listen_to: ['direct_message','direct_mention'],
-  menu: function(bot, message) {
-    let latest = Menu[0].message
-    bot.reply(message, latest)
+  random_answer: function(results) {
+    return results[Math.floor(Math.random() * results.length)]
   },
-  dishes: function(bot, message) {
-  
-    const wanted = message.match[1]
-    const wanted_lower = wanted.toLowerCase()
-    const available = Menu[0].message.split('\n')
-    const dishes = []
+  menu: function(chat, message) {
+    chat.reply(message, Menu.today())
+  },
+  help: function(chat, message) {
+    chat.reply(message, "Send me a message or @mention with `menu` to get today's menu. For example, `@leblon menu`. You can also ask me to check if a particular ingredient is available today. Examples: `@leblon picanha?` or `@leblon polvo?`")
+  },
+  troll: function(chat, message) {
+    let answer = bot.random_answer(troll_results)
+                      .replaceAll('YYY', message.text)
+    chat.reply(message, answer)
+  },
+  dishes: function(chat, message) {
+    const match = message.match[1]
+    if (message.text != match) return bot.troll(chat, message)
 
-    for (let line of available) {
-      let hit = line.toLowerCase().includes(wanted_lower)
-      if (hit) dishes.push(line.trim())
+    const wanted = match.replace('?', '')
+    const wanted_lower = wanted.toLowerCase()
+    const wanted_capital = wanted.capitalize()
+    const available = []
+
+    for (let line of Menu.dishes()) {
+      let pattern = new RegExp('\\b'+wanted_lower+'\\b');
+      let hit = pattern.test(line.toLowerCase())
+      if (hit) available.push(line.trim())
     }
 
     var answer = ''
-    if (dishes.length == 0) {
-      answer = no_option[Math.floor(Math.random() * no_option.length)]
-      answer = answer.replaceAll('XXX', wanted.capitalize())
-    } else if (dishes.length == 1) {
-      answer = single_option[Math.floor(Math.random() * single_option.length)]
-      answer = answer.replaceAll('XXX', dishes[0])
+    if (available.length == 0) {
+      answer = bot.random_answer(no_results)
+                .replaceAll('XXX', wanted_capital)
+    } else if (available.length == 1) {
+      answer = bot.random_answer(single_result)
+                .replaceAll('XXX', available[0])
     } else {
-      answer = multi_option[Math.floor(Math.random() * multi_option.length)]
-      answer = answer.replaceAll('YYY', wanted.capitalize())
-      answer = answer.replaceAll('XXX', dishes.join(' or '))
+      answer = bot.random_answer(multiple_results)
+                .replaceAll('YYY', wanted_capital)
+                .replaceAll('XXX', available.join(' or '))
     }
-    bot.reply(message, answer)
-  }
-}
-
-const controller = Botkit.slackbot({
-  debug: false
-})
-controller.hears(['menu','today'], commands.listen_to, commands.menu)
-controller.hears(['(\\w.*\\b)\\^?', '(\\w.+\\b)\\^!'], commands.listen_to, commands.dishes)
-
-const bot = {
-  start: function(start_menu) {
-    Menu = start_menu
-    controller.spawn({token: config('SLACK_TOKEN')}).startRTM()
+    chat.reply(message, answer)
   },
-  update: function(new_menu) {
-    Menu = new_menu
+  update: function(menu) {
+    Menu.set(menu)
+  },
+  start: function(menu) {
+    bot.update(menu)
+    bot.slack.hears(['menu','today'], bot.listen_to, bot.menu)
+    bot.slack.hears(['(\\b\\w+\\?)'], bot.listen_to, bot.dishes)
+    bot.slack.hears(['\\?', 'help'], bot.listen_to, bot.help)
+    bot.slack.hears(['.*'], bot.listen_to, bot.troll)
+    bot.slack.spawn({token: config('SLACK_TOKEN')}).startRTM()
   }
 }
 

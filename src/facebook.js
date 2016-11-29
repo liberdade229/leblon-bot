@@ -16,10 +16,10 @@ const facebook = {
     fb.api('oauth/access_token', auth , function(res) {
       if(!res || res.error) {
         console.log(!res ? 'Error fetching access token' : res.error)
-        return;
+        return
       }
-      fb.setAccessToken(res.access_token);
-      facebook.update(cb);
+      fb.setAccessToken(res.access_token)
+      facebook.update(cb)
     })
   },
   update: function(cb) {
@@ -29,10 +29,10 @@ const facebook = {
     }
     fb.api(config('FB_FEED'), options, function(res) {
       if (!res || res.error) {
-        console.log(!res ? 'Error fetching feed' : res.error);
+        console.log(!res ? 'Error fetching feed' : res.error)
         return;
       }
-      if (cb) cb(res.data);
+      if (cb) cb(res.data)
     })
   }
 }
