@@ -16,11 +16,7 @@ const single_result = require('./data/single_result.txt').split('\n')
 const multiple_results = require('./data/multiple_results.txt').split('\n')
 const troll_results = require('./data/troll_results.txt').split('\n')
 
-function bot() {
-  
-  const slack = Botkit.slackbot({debug: false})
-
-  const listen_to = ['direct_message','direct_mention']
+function bot() {  
 
   function menu(chat, message) {
     chat.reply(message, Menu.today())
@@ -52,11 +48,10 @@ function bot() {
     }
 
     var answer = ''
-    if (available.length == 0) {
+    if (available.length === 0) {
       answer = utils.random(no_results)
-      answer = utils.replace_all(answer, 'XXX', wanted_capital)
-                
-    } else if (available.length == 1) {
+      answer = utils.replace_all(answer, 'XXX', wanted_capital)             
+    } else if (available.length === 1) {
       answer = utils.random(single_result)
       answer = utils.replace_all(answer, 'XXX', available[0])
     } else {
@@ -67,12 +62,13 @@ function bot() {
     chat.reply(message, answer)
   }
 
-  function update(feed) {
+  function save_menu(feed) {
     Menu.set(feed)
   }
 
-  function start(feed) {
-    update(feed)
+  function start() {
+    const listen_to = ['direct_message','direct_mention']
+    const slack = Botkit.slackbot({debug: false})
     slack.hears(['menu','today'], listen_to, menu)
     slack.hears(['(\\b\\w+\\?)'], listen_to, dishes)
     slack.hears(['\\?', 'help'], listen_to, help)
@@ -80,9 +76,22 @@ function bot() {
     slack.spawn({token: config('SLACK_TOKEN')}).startRTM()
   }
 
+  function update_feed(feed_cb) {
+    feed_cb(function(feed) {
+      save_menu(feed)
+    })
+  }
+
+  function start_with_feed(feed_cb) {
+    feed_cb(function(feed) {
+      save_menu(feed)
+      start()
+    })
+  }
+
   return {
-    update: update,
-    start: start
+    update_feed: update_feed,
+    start_with_feed: start_with_feed
   }
 }
 
