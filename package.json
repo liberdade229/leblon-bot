@@ -4,8 +4,8 @@
   "description": "Leblon Bot",
   "main": "src/index.js",
   "engines": {
-    "node": "^5",
-    "npm": "^3
+    "node": "^7.0.0",
+    "npm": "^3.10.0"
   },
   "dependencies": {
     "botkit": "^0.4.2",
