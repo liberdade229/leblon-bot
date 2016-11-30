@@ -73,6 +73,7 @@ function bot() {
     slack.hears(['(\\b\\w+\\?)'], listen_to, dishes)
     slack.hears(['\\?', 'help'], listen_to, help)
     slack.hears(['.*'], listen_to, troll)
+    slack.hears(['.*'], ['mention'], troll)
     slack.spawn({token: config('SLACK_TOKEN')}).startRTM()
   }
 
