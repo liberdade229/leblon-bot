@@ -69,12 +69,26 @@ function bot() {
   function start() {
     const listen_to = ['direct_message', 'direct_mention']
     const slack = Botkit.slackbot({debug: false})
+    const slackbot = slack.spawn({
+      token: config('SLACK_TOKEN'),
+      retry: Infinity
+    })
+
     slack.hears(['menu', 'today'], listen_to, menu)
     slack.hears(['(\\b\\w+\\?)'], listen_to, dishes)
     slack.hears(['\\?', 'help'], listen_to, help)
     slack.hears(['.*'], listen_to, troll)
     slack.hears(['.*'], ['mention'], troll)
-    slack.spawn({token: config('SLACK_TOKEN')}).startRTM()
+
+    slack.on('rtm_close', function() {
+      slackbot.startRTM()
+    })
+
+    slack.on('rtm_open', function() {
+      console.log('Connected to Slack RTM')
+    })
+
+    slackbot.startRTM()
   }
 
   function update_feed(feed_cb) {
