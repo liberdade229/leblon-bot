@@ -80,9 +80,9 @@ function bot() {
     slack.hears(['.*'], listen_to, troll)
     slack.hears(['.*'], ['mention'], troll)
 
-    slack.on('rtm_close', function() {
-      slackbot.startRTM()
-    })
+    // slack.on('rtm_close', function() {
+    //   slackbot.startRTM()
+    // })
 
     slack.on('rtm_open', function() {
       console.log('Connected to Slack RTM')
