@@ -8,7 +8,14 @@ const Menu = {
     return Menu.feed
   },
   today: function() {
-    return Menu.feed[0].message
+    var latest = Menu.feed[0].message
+    for (let post of Menu.feed) {
+      if (post.message.match(/apetite/g)) {
+        latest = post.message
+        break
+      }
+    }
+    return latest
   },
   dishes: function() {
     return Menu.today().split('\n')
