@@ -8,9 +8,9 @@ const Menu = {
     return Menu.feed
   },
   today: function() {
-    var latest = Menu.feed[0].message
+    var latest = null
     for (let post of Menu.feed) {
-      if (post.meessage && post.message.match(/apetite/g)) {
+      if (post.message && post.message.match(/apetite/g)) {
         latest = post.message
         break
       }

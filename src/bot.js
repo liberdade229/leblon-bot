@@ -19,7 +19,7 @@ const troll_results = require('./data/troll_results.txt').split('\n')
 function bot() {  
 
   function menu(chat, message) {
-    if (chat && message) chat.reply(message, Menu.today())
+    chat.reply(message, Menu.today())
   }
 
   function help(chat, message) {
