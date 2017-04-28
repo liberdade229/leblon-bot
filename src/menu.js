@@ -10,7 +10,7 @@ const Menu = {
   today: function() {
     var latest = Menu.feed[0].message
     for (let post of Menu.feed) {
-      if (post.message.match(/apetite/g)) {
+      if (post.meessage && post.message.match(/apetite/g)) {
         latest = post.message
         break
       }
